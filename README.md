@@ -39,7 +39,14 @@ Advanced source code and text file printing for PowerShell. The perfect tool for
    If you have already cloned the repository without submodules, initialize them with:
 
    ```bash
-   git submodule update --init --recursive
+  git submodule update --init --recursive
+  ```
+
+   On Windows you can use the helper script to install the required Visual Studio
+   workloads and restore packages:
+
+   ```powershell
+   scripts\setup_windows.ps1
    ```
 
 2. Open `src/WinPrint.sln` in **Visual Studio 2025** with the **Desktop Development with C++** and **.NET Desktop Development** workloads installed.
