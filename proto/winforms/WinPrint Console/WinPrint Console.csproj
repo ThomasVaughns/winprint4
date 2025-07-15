@@ -9,6 +9,10 @@
     <Version>2.0.0-beta</Version>
     <AssemblyTitle>WinPrint</AssemblyTitle>
     <AssemblyName>winprint</AssemblyName>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
   </PropertyGroup>
 
   <ItemGroup>

@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <RestoreNoWarn>NU1605</RestoreNoWarn>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -25,6 +30,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <MakeDir Directories="$(TargetDir)" />
     <Exec Command="copy ..\..\tools\pygmentize.exe $(TargetDir)" />
   </Target>
 

@@ -28,6 +28,61 @@ Advanced source code and text file printing for PowerShell. The perfect tool for
 * [About](https://tig.github.io/winprint/about.html)
 * [Support](https://tig.github.io/winprint/support.html)
 
+## Building from Source
+
+1. Clone the repository with submodules enabled:
+
+   ```bash
+   git clone --recursive https://github.com/tig/winprint.git
+   ```
+
+   If you have already cloned the repository without submodules, initialize them with:
+
+   ```bash
+  git submodule update --init --recursive
+  ```
+
+   On Windows you can use the helper script to install the required Visual Studio
+   workloads and restore packages:
+
+   ```powershell
+  # Install the latest Visual Studio Build Tools and restore packages
+  scripts\setup_windows.ps1 -VSVersion 2025
+   ```
+
+2. Open `src/WinPrint.sln` in **Visual Studio 2025** with the **Desktop Development with C++** and **.NET Desktop Development** workloads installed.
+3. Select the `Release` configuration and the `x64` platform.
+4. Build the solution. The post-build steps copy all required binaries to the `release` folder located one level above the `src` directory. If the build fails with errors about the Windows Desktop SDK, install the **.NET Desktop Development** workload from the Visual Studio Installer.
+5. Run `winprintgui.exe` or `winprint.exe` from the `release` directory.
+
+### Building from the command line
+
+If you prefer using the **dotnet** CLI instead of Visual Studio, run the
+following commands in a Windows terminal after running the setup script:
+
+```powershell
+dotnet restore src\WinPrint.sln
+dotnet build src\WinPrint.sln -c Release -p:Platform=x64 -p:WarningAsError=false
+dotnet test tests\WinPrint.Core.UnitTests\WinPrint.Core.UnitTests.csproj -c Release
+```
+
+The build outputs are placed in the `release` folder above `src`. Executables
+(`winprint.exe` and `winprintgui.exe`) can be found there once the build
+completes.
+
+The `x64` subdirectory contains the native LiteHtml library needed at runtime. Ensure it is copied alongside the executables when distributing the app.
+
+### Building with CMake
+
+You can also build the solution using CMake which wraps the normal `dotnet` build.
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+The CMake build places the binaries in the same `release` directory as the Visual Studio build.
+
 ## Graphical Interface
 
 ![winprint 2.0](https://tig.github.io/winprint/winprint2.png)
@@ -78,3 +133,29 @@ ls .\* -include ('*.c', '*.h') | foreach { cat $_.FullName | out-winPrint -p "HP
 ## Contributing
 
 I'm open to pull requests. I'll also take donations, preferably in beer or Scotch.
+
+## Continuous Integration
+
+This repository includes a workflow at `.github/workflows/dotnet-desktop.yml`
+that builds the solution on Windows runners. The workflow restores NuGet
+packages, executes unit tests, and uses MSBuild to create an MSIX package of the
+installer project. If you fork the repo, update the `Base64_Encoded_Pfx` and
+`Pfx_Key` secrets to enable signing or comment out the packaging steps.
+
+### Build Troubleshooting with GitHub Copilot
+
+If you encounter build failures in Visual Studio, GitHub Copilot can help you
+identify missing workloads or incorrect paths. Ensure the **.NET Desktop
+Development** and **Desktop Development with C++** workloads are installed.
+Search error messages with `Ctrl+Enter` in Copilot Chat to get suggestions on
+resolving issues such as missing Windows Desktop SDKs or incorrect MSBuild
+paths. Copilot can also help craft the proper `dotnet` or `msbuild` commands if
+you see build failures. A typical prompt is:
+
+```
+copilot: how do I fix "Microsoft.NET.Sdk.WindowsDesktop" not found when building winprint?
+```
+
+The `release` folder above `src` contains the final executables
+(`winprint.exe` and `winprintgui.exe`).
+

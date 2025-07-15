@@ -8,6 +8,10 @@
     <StartupObject>WinPrint.Program</StartupObject>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <ApplicationIcon>Document.ico</ApplicationIcon>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
     
     <Copyright>Copyright (C) 2020 Kindel Systems, LLC - https://kindel.com/winprint</Copyright>
     <Company>Kindel Systems, LLC</Company>
