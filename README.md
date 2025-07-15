@@ -111,3 +111,21 @@ ls .\* -include ('*.c', '*.h') | foreach { cat $_.FullName | out-winPrint -p "HP
 
 I'm open to pull requests. I'll also take donations, preferably in beer or Scotch.
 
+## Continuous Integration
+
+This repository includes a workflow at `.github/workflows/dotnet-desktop.yml`
+that builds the solution on Windows runners. The workflow restores NuGet
+packages, executes unit tests, and uses MSBuild to create an MSIX package of the
+installer project. If you fork the repo, update the `Base64_Encoded_Pfx` and
+`Pfx_Key` secrets to enable signing or comment out the packaging steps.
+
+### Build Troubleshooting with GitHub Copilot
+
+If you encounter build failures in Visual Studio, GitHub Copilot can help you
+identify missing workloads or incorrect paths. Ensure the **.NET Desktop
+Development** and **Desktop Development with C++** workloads are installed.
+Search error messages with `Ctrl+Enter` in Copilot Chat to get suggestions on
+resolving issues such as missing Windows Desktop SDKs or MSBuild paths. The
+`release` folder above `src` contains the final executables (`winprint.exe` and
+`winprintgui.exe`).
+
