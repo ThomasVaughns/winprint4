@@ -49,6 +49,17 @@ Advanced source code and text file printing for PowerShell. The perfect tool for
 
 The `x64` subdirectory contains the native LiteHtml library needed at runtime. Ensure it is copied alongside the executables when distributing the app.
 
+### Building with CMake
+
+You can also build the solution using CMake which wraps the normal `dotnet` build.
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+The CMake build places the binaries in the same `release` directory as the Visual Studio build.
+
 ## Graphical Interface
 
 ![winprint 2.0](https://tig.github.io/winprint/winprint2.png)
