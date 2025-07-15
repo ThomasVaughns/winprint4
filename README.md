@@ -36,9 +36,15 @@ Advanced source code and text file printing for PowerShell. The perfect tool for
    git clone --recursive https://github.com/tig/winprint.git
    ```
 
+   If you have already cloned the repository without submodules, initialize them with:
+
+   ```bash
+   git submodule update --init --recursive
+   ```
+
 2. Open `src/WinPrint.sln` in **Visual Studio 2025** with the **Desktop Development with C++** and **.NET Desktop Development** workloads installed.
 3. Select the `Release` configuration and the `x64` platform.
-4. Build the solution. The post-build steps copy all required binaries to the `release` folder located one level above the `src` directory.
+4. Build the solution. The post-build steps copy all required binaries to the `release` folder located one level above the `src` directory. If the build fails with errors about the Windows Desktop SDK, install the **.NET Desktop Development** workload from the Visual Studio Installer.
 5. Run `winprintgui.exe` or `winprint.exe` from the `release` directory.
 
 The `x64` subdirectory contains the native LiteHtml library needed at runtime. Ensure it is copied alongside the executables when distributing the app.
