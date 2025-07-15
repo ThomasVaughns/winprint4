@@ -59,16 +59,16 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <MakeDir Directories="$(SolutionDir)..\release" />
-    <MakeDir Directories="$(SolutionDir)..\release\x64" />
-    <Exec Command="copy $(TargetDir)$(TargetName).runtimeconfig.json $(SolutionDir)WinPrint.Console\$(OutDir)" />
-    <Exec Command="xcopy /Y /E $(TargetDir)x64 $(SolutionDir)WinPrint.Console\$(OutDir)x64" />
-    <Exec Command="copy $(OutDir)$(TargetName).exe $(SolutionDir)..\release\" />
-    <Exec Command="copy $(OutDir)$(TargetName).dll $(SolutionDir)..\release\" />
-    <Exec Command="copy $(OutDir)$(TargetName).runtimeconfig.json $(SolutionDir)..\release\" />
-    <Exec Command="xcopy /Y /E \"$(OutDir)x64\" \"$(SolutionDir)..\release\x64\"" />
-    <Exec Command="copy $(SolutionDir)..\tools\pygmentize.exe $(TargetDir)" />
-  </Target>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <MakeDir Directories="$(SolutionDir)..\release" />
+      <MakeDir Directories="$(SolutionDir)..\release\x64" />
+      <Exec Command='copy "$(TargetDir)$(TargetName).runtimeconfig.json" "$(SolutionDir)WinPrint.Console\$(OutDir)"' />
+      <Exec Command='xcopy /Y /E "$(TargetDir)x64" "$(SolutionDir)WinPrint.Console\$(OutDir)x64"' />
+      <Exec Command='copy "$(OutDir)$(TargetName).exe" "$(SolutionDir)..\release\"' />
+      <Exec Command='copy "$(OutDir)$(TargetName).dll" "$(SolutionDir)..\release\"' />
+      <Exec Command='copy "$(OutDir)$(TargetName).runtimeconfig.json" "$(SolutionDir)..\release\"' />
+      <Exec Command='xcopy /Y /E "$(OutDir)x64" "$(SolutionDir)..\release\x64"' />
+      <Exec Command='copy "$(SolutionDir)..\tools\pygmentize.exe" "$(TargetDir)"' />
+    </Target>
 
 </Project>

@@ -58,14 +58,14 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <MakeDir Directories="$(SolutionDir)..\release" />
-    <MakeDir Directories="$(SolutionDir)..\release\x64" />
-    <Exec Command="copy $(TargetDir)$(TargetName).runtimeconfig.json $(SolutionDir)..\release\" />
-    <Exec Command="copy $(TargetDir)$(TargetFileName) $(SolutionDir)..\release\" />
-    <Exec Command="copy $(TargetDir)$(TargetName).dll $(SolutionDir)..\release\" />
-    <Exec Command="xcopy /Y /E \"$(TargetDir)x64\" \"$(SolutionDir)..\release\x64\"" />
-    <Exec Command="copy ..\..\tools\pygmentize.exe $(TargetDir)" />
-  </Target>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <MakeDir Directories="$(SolutionDir)..\release" />
+      <MakeDir Directories="$(SolutionDir)..\release\x64" />
+      <Exec Command='copy "$(TargetDir)$(TargetName).runtimeconfig.json" "$(SolutionDir)..\release\"' />
+      <Exec Command='copy "$(TargetDir)$(TargetFileName)" "$(SolutionDir)..\release\"' />
+      <Exec Command='copy "$(TargetDir)$(TargetName).dll" "$(SolutionDir)..\release\"' />
+      <Exec Command='xcopy /Y /E "$(TargetDir)x64" "$(SolutionDir)..\release\x64"' />
+      <Exec Command='copy ..\..\tools\pygmentize.exe "$(TargetDir)"' />
+    </Target>
 
 </Project>
