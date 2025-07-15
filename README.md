@@ -28,6 +28,21 @@ Advanced source code and text file printing for PowerShell. The perfect tool for
 * [About](https://tig.github.io/winprint/about.html)
 * [Support](https://tig.github.io/winprint/support.html)
 
+## Building from Source
+
+1. Clone the repository with submodules enabled:
+
+   ```bash
+   git clone --recursive https://github.com/tig/winprint.git
+   ```
+
+2. Open `src/WinPrint.sln` in **Visual Studio 2025** with the **Desktop Development with C++** and **.NET Desktop Development** workloads installed.
+3. Select the `Release` configuration and the `x64` platform.
+4. Build the solution. The post-build steps copy all required binaries to the `release` folder located one level above the `src` directory.
+5. Run `winprintgui.exe` or `winprint.exe` from the `release` directory.
+
+The `x64` subdirectory contains the native LiteHtml library needed at runtime. Ensure it is copied alongside the executables when distributing the app.
+
 ## Graphical Interface
 
 ![winprint 2.0](https://tig.github.io/winprint/winprint2.png)
@@ -78,3 +93,4 @@ ls .\* -include ('*.c', '*.h') | foreach { cat $_.FullName | out-winPrint -p "HP
 ## Contributing
 
 I'm open to pull requests. I'll also take donations, preferably in beer or Scotch.
+
