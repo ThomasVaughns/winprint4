@@ -66,6 +66,10 @@ dotnet build src\WinPrint.sln -c Release -p:Platform=x64 -p:WarningAsError=false
 dotnet test tests\WinPrint.Core.UnitTests\WinPrint.Core.UnitTests.csproj -c Release
 ```
 
+The repository includes a `global.json` file pinning the .NET SDK version used
+for development. Ensure that version is installed, or edit `global.json` to
+match the SDK version available on your machine.
+
 The build outputs are placed in the `release` folder above `src`. Executables
 (`winprint.exe` and `winprintgui.exe`) can be found there once the build
 completes.
@@ -154,6 +158,13 @@ you see build failures. A typical prompt is:
 
 ```
 copilot: how do I fix "Microsoft.NET.Sdk.WindowsDesktop" not found when building winprint?
+```
+
+Copilot can also generate PowerShell snippets to run the build automatically,
+copy the resulting executables, or create an installer. Ask Copilot things like:
+
+```
+copilot: write a PowerShell script to build WinPrint.sln and zip the release folder
 ```
 
 The `release` folder above `src` contains the final executables

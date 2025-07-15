@@ -18,6 +18,9 @@ if (-not $SkipInstall) {
     $buildToolsId = "Microsoft.VisualStudio.$VSVersion.BuildTools"
     winget install -e --id $buildToolsId --source winget `
         --override "--quiet --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --norestart" || Write-Warning "winget failed or is not available. Ensure Visual Studio with the .NET Desktop and C++ workloads is installed"
+
+    Write-Host "Installing the .NET Windows Desktop workload..."
+    dotnet workload install windowsdesktop || Write-Warning "Failed to install the Windows Desktop workload"
 }
 
 Write-Host "Restoring NuGet packages..."
