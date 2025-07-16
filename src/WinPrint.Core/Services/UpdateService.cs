@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
+using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
 using Octokit;
@@ -31,9 +34,10 @@ namespace WinPrint.Core.Services {
             DownloadComplete?.Invoke(this, path);
         }
 
-        public event EventHandler<DownloadProgressChangedEventArgs> DownloadProgressChanged;
-        protected void OnDownloadProgressChanged(DownloadProgressChangedEventArgs e) {
-            DownloadProgressChanged?.Invoke(this, e);
+        public event EventHandler<int> DownloadProgressChanged;
+        protected void OnDownloadProgressChanged(int percent)
+        {
+            DownloadProgressChanged?.Invoke(this, percent);
         }
 
         /// <summary>
@@ -44,7 +48,19 @@ namespace WinPrint.Core.Services {
         /// <summary>
         /// Provides the current version number
         /// </summary>
-        public static Version CurrentVersion => new Version(FileVersionInfo.GetVersionInfo(Assembly.GetAssembly(typeof(UpdateService)).Location).ProductVersion);
+        public static Version CurrentVersion {
+            get {
+                var filePath = Assembly.GetAssembly(typeof(UpdateService)).Location;
+                var fileVersionInfo = FileVersionInfo.GetVersionInfo(filePath);
+                try {
+                    return new Version(fileVersionInfo.ProductVersion.Split('-')[0]);
+                } catch (Exception ex) {
+                    // Log the error and fallback to a default version
+                    Log.Error("Invalid ProductVersion format: {ProductVersion}. Exception: {Exception}", fileVersionInfo.ProductVersion, ex);
+                    return new Version(0, 0);
+                }
+            }
+        }
 
         /// <summary>
         /// Contains the version number of the latest version found online (only valid after GotLatestVersion)
@@ -84,29 +100,18 @@ namespace WinPrint.Core.Services {
         /// <returns></returns>
         public async Task<Version> GetLatestVersionAsync(CancellationToken token) {
             InstallerUri = new Uri("https://github.com/tig/winprint/releases");
-            using var client = new WebClient();
             try {
                 var github = new GitHubClient(new Octokit.ProductHeaderValue("tig-winprint"));
                 var allReleases = await github.Repository.Release.GetAll("tig", "winprint").ConfigureAwait(false);
-
-                //#if DEBUG
-                //                Debug.WriteLine("Pausing 2s to simulate version check taking a long time...");
-                //                Thread.Sleep(2000);
-                //                Debug.WriteLine("Done pausing.");
-                //#endif
                 token.ThrowIfCancellationRequested();
-
-                // Get all releases and pre-releases
 #if DEBUG
                 var releases = allReleases.Where(r => r.Prerelease).OrderByDescending(r => new Version(r.TagName.Replace('v', ' '))).ToArray();
 #else
-                    var releases = allReleases.Where(r => !r.Prerelease).OrderByDescending(r => new Version(r.TagName.Replace('v', ' '))).ToArray();
+                var releases = allReleases.Where(r => !r.Prerelease).OrderByDescending(r => new Version(r.TagName.Replace('v', ' '))).ToArray();
 #endif
-                //Log.Debug("Releases {releases}", JsonSerializer.Serialize(releases, options: new JsonSerializerOptions() { WriteIndented = true }));
                 if (releases.Length > 0) {
                     Log.Debug("The latest release is tagged at {TagName} and is named {Name}. Download Url: {BrowserDownloadUrl}",
                         releases[0].TagName, releases[0].Name, releases[0].Assets[0].BrowserDownloadUrl);
-
                     LatestVersion = new Version(releases[0].TagName.Replace('v', ' '));
                     ReleasePageUri = new Uri(releases[0].HtmlUrl);
                     InstallerUri = new Uri(releases[0].Assets[0].BrowserDownloadUrl);
@@ -119,7 +124,6 @@ namespace WinPrint.Core.Services {
                 ErrorMessage = $"({ReleasePageUri}) {e.Message}";
                 ServiceLocator.Current.TelemetryService.TrackException(e);
             }
-
             OnGotLatestVersion(LatestVersion);
             return LatestVersion;
         }
@@ -127,43 +131,39 @@ namespace WinPrint.Core.Services {
         /// <summary>
         /// Starts an upgrade. Must be called after GotLatestVersion has been fired.
         /// </summary>
-        public async Task<string> StartUpgradeAsync() {
+        public async Task<string> StartUpgradeAsync()
+        {
             Debug.WriteLine("StartUpgradeAsync");
-            // Download file
             _tempFilename = Path.GetTempFileName() + ".msi";
             //Log.Information($"{this.GetType().Name}: Downloading {InstallerUri.AbsoluteUri} to {_tempFilename}...");
 
-            var client = new WebClient();
-            client.DownloadDataCompleted += Client_DownloadDataCompleted;
-            client.DownloadProgressChanged += Client_DownloadProgressChanged;
-            File.WriteAllBytes(_tempFilename, await client.DownloadDataTaskAsync(InstallerUri).ConfigureAwait(false));
-            return _tempFilename;
-        }
-
-        private void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e) {
-            //Log.Debug($"{this.GetType().Name}: Download progress {e.ProgressPercentage}%");
-            //if (e.ProgressPercentage % 33 == 0) {
-            //    Log.Information($"{this.GetType().Name}: Download progress {e.ProgressPercentage}%");
-            //}
-            OnDownloadProgressChanged(e);
-        }
-
-        private void Client_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e) {
-            //try {
-            //    // If the request was not canceled and did not throw
-            //    // an exception, display the resource.
-            //    if (!e.Cancelled && e.Error == null) {
-            //        //File.WriteAllBytes(_tempFilename, (byte[])e.Result);
-            //    }
-            //}
-            //finally {
-
-            //}
-            ////Log.Information($"{this.GetType().Name}: Download complete");
-            ////Log.Information($"{this.GetType().Name}: Exiting and running installer ({_tempFilename})...");
-
-
+            using var httpClient = new HttpClient();
+            using var response = await httpClient.GetAsync(InstallerUri, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+            var canReportProgress = totalBytes != -1;
+            using var stream = await response.Content.ReadAsStreamAsync();
+            using var fileStream = new System.IO.FileStream(_tempFilename, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None);
+            var buffer = new byte[81920];
+            long totalRead = 0;
+            int read;
+            int lastPercent = 0;
+            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            {
+                await fileStream.WriteAsync(buffer, 0, read);
+                totalRead += read;
+                if (canReportProgress)
+                {
+                    int percent = (int)((totalRead * 100) / totalBytes);
+                    if (percent != lastPercent)
+                    {
+                        OnDownloadProgressChanged(percent);
+                        lastPercent = percent;
+                    }
+                }
+            }
             OnDownloadComplete(_tempFilename);
+            return _tempFilename;
         }
     }
 }

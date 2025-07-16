@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using WinPrint.Core.Models;
@@ -135,28 +134,20 @@ namespace WinPrint.Core {
         public string ReplaceMacros(string value) {
             return Regex.Replace(value, @"(?<start>\{)+(?<property>[\w\.\[\]]+)(?<format>:[^}]+)?(?<end>\})+", match => {
                 var p = Expression.Parameter(typeof(Macros), "Macros");
-
                 var startGroup = match.Groups["start"];
                 var propertyGroup = match.Groups["property"];
                 var formatGroup = match.Groups["format"];
                 var endGroup = match.Groups["end"];
-
                 try {
-                    // Generate and parse a LambdaExpression
-                    var e = DynamicExpressionParser.ParseLambda(new[] { p }, null, propertyGroup.Value);
-                    var computedValue = e.Compile().DynamicInvoke(this);
+                    // Use reflection instead of DynamicExpressionParser
+                    var propInfo = typeof(Macros).GetProperty(propertyGroup.Value);
+                    var computedValue = propInfo?.GetValue(this);
                     if (formatGroup.Success) {
-                        // There's a format specifier
-                        // The following does: string.Format("{0:formatGroup.Value}", computedValue)
                         return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0" + formatGroup.Value + "}", computedValue);
-                    }
-                    else {
-                        // Get here when there is no format specifier.
+                    } else {
                         return (computedValue ?? "").ToString();
                     }
-                }
-                catch { //(ParseException ex) {
-                    // Non-existant Property or other parse error
+                } catch {
                     return match.Groups[0].Value;
                 }
             });

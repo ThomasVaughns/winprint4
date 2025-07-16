@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing.Printing;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Management.Automation;
 using System.Management.Automation.Language;
 //using TTRider.PowerShellAsync;

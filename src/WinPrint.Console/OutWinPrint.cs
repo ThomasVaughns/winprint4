@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Management.Automation;
 using System.Management.Automation.Internal;
 using System.Management.Automation.Runspaces;
@@ -199,11 +198,12 @@ namespace WinPrint.Console {
             _getVersionCancellationToken?.Cancel();
         }
 
-        private void UpdateService_DownloadProgressChanged(object sender, System.Net.DownloadProgressChangedEventArgs e) {
-            //Debug.WriteLine("UpdateService_DownloadProgressChanged");
-            var rec = new ProgressRecord(0, "Downloading", "Downloading") {
+        private void UpdateService_DownloadProgressChanged(object sender, int percent)
+        {
+            var rec = new ProgressRecord(0, "Downloading", "Downloading")
+            {
                 CurrentOperation = $"Downloading",
-                PercentComplete = e.ProgressPercentage
+                PercentComplete = percent
             };
             WriteProgress(rec);
         }
@@ -429,7 +429,7 @@ namespace WinPrint.Console {
                         Log.Information("   {printer}", printer);
                     }
                     Log.Fatal(new Exception($"{PrinterName} is not a valid printer name. Valid printer names include " +
-                        $"{string.Join(", ", PrinterSettings.InstalledPrinters.ToDynamicList().ToArray())}."), "");
+                        $"{string.Join(", ", PrinterSettings.InstalledPrinters.Cast<string>().ToArray())}."), "");
                     CleanUpUpdateHandler();
                     return;
                 }
