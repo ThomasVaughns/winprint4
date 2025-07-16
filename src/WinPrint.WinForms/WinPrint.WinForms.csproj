@@ -8,10 +8,8 @@
     <CefSharpAnyCpuSupport>true</CefSharpAnyCpuSupport>
     <StartupObject>WinPrint.Winforms.Program</StartupObject>
     <ApplicationIcon>Document.ico</ApplicationIcon>
-
     <AssemblyTitle>winprint GUI</AssemblyTitle>
     <AssemblyName>winprintgui</AssemblyName>
-
     <Version>2.0.5.102</Version>
     <Company>Kindel Systems</Company>
     <Product>winprint</Product>
@@ -21,17 +19,25 @@
     <PackageReleaseNotes>No release notes.</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/tig/winprint</PackageProjectUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
-
+    <WarningsNotAsErrors>NU1605</WarningsNotAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702</NoWarn>
+    <NoWarn>1701;1702;NU1605</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;NU1605</NoWarn>
   </PropertyGroup>
   
   <ItemGroup>
-
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="MvvmLightLibsStd10" Version="5.4.1.1" />
+    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
+    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
+    <PackageReference Include="System.Runtime" Version="4.3.1" />
+    <PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
   </ItemGroup>
 
   <ItemGroup>
